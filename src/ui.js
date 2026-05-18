@@ -4,6 +4,23 @@ export class UI {
     }
 
     createHUD() {
+        // Button styles
+        const btnStyle = `
+            width: 70px;
+            height: 70px;
+            background: rgba(255,255,255,0.3);
+            border: 2px solid white;
+            border-radius: 10px;
+            color: white;
+            font-weight: bold;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            user-select: none;
+            touch-action: none;
+            position: absolute;
+        `;
+
         const hud = document.createElement('div');
         hud.style.position = 'absolute';
         hud.style.bottom = '20px';
@@ -51,6 +68,34 @@ export class UI {
         };
 
         document.body.appendChild(this.mapOverlay);
+
+        // Mobile Controls
+        this.controls = {};
+        const createBtn = (text, bottom, right, id) => {
+            const btn = document.createElement('div');
+            btn.style.cssText = btnStyle;
+            btn.style.bottom = bottom;
+            btn.style.right = right;
+            btn.innerText = text;
+            btn.id = id;
+            document.body.appendChild(btn);
+
+            const state = { pressed: false };
+            btn.ontouchstart = () => state.pressed = true;
+            btn.ontouchend = () => state.pressed = false;
+            btn.onmousedown = () => state.pressed = true;
+            btn.onmouseup = () => state.pressed = false;
+
+            this.controls[id] = state;
+            return btn;
+        };
+
+        createBtn('GAS', '100px', '20px', 'gas');
+        createBtn('BRK', '20px', '100px', 'brake');
+        createBtn('L', '20px', '300px', 'left');
+        createBtn('R', '20px', '200px', 'right');
+        createBtn('JUMP', '180px', '20px', 'jump');
+        createBtn('ENTER', '180px', '100px', 'enter');
 
         // Stats
         const stats = document.createElement('div');

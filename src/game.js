@@ -1,28 +1,34 @@
 import * as THREE from 'three';
+import { MissionMarker } from './world.js';
 
 export class StoryManager {
     constructor(game) {
         this.game = game;
         this.currentMission = 0;
+        this.marker = null;
         this.missions = [
             {
                 name: "The Beginning",
                 description: "Meet your girlfriend at the restaurant.",
-                trigger: () => this.game.player.mesh.position.distanceTo(new THREE.Vector3(0, 0, 0)) < 50
+                location: new THREE.Vector3(0, 0, 0),
+                trigger: () => this.game.player.mesh.position.distanceTo(new THREE.Vector3(0, 0, 0)) < 20
             },
             {
                 name: "The Tragedy",
                 description: "Watch the news. Find out what happened.",
-                trigger: () => true // Auto-trigger after mission 0
+                location: new THREE.Vector3(-300, 0, 100),
+                trigger: () => this.game.player.mesh.position.distanceTo(new THREE.Vector3(-300, 0, 100)) < 20
             },
             {
                 name: "Vengeance",
-                description: "Steal the medical helicopter and attack the gang headquarters.",
-                trigger: () => this.game.vehicle.active && this.game.vehicle.mesh.position.y > 50
+                description: "Find the gang headquarters and take revenge.",
+                location: new THREE.Vector3(500, 0, 500),
+                trigger: () => this.game.player.mesh.position.distanceTo(new THREE.Vector3(500, 0, 500)) < 20
             }
         ];
 
         this.initMissionUI();
+        this.spawnMarker();
     }
 
     initMissionUI() {
@@ -35,6 +41,14 @@ export class StoryManager {
         this.missionEl.style.textShadow = '2px 2px black';
         document.body.appendChild(this.missionEl);
         this.updateUI();
+    }
+
+    spawnMarker() {
+        if (this.marker) this.marker.remove();
+        const m = this.missions[this.currentMission];
+        if (m && m.location) {
+            this.marker = new MissionMarker(this.game.scene, m.location);
+        }
     }
 
     updateUI() {
@@ -51,6 +65,7 @@ export class StoryManager {
         if (m && m.trigger()) {
             console.log("Mission step complete: " + m.name);
             this.currentMission++;
+            this.spawnMarker();
             this.updateUI();
         }
     }

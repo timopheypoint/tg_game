@@ -1,11 +1,14 @@
 import * as THREE from 'three';
 import * as CANNON from 'cannon-es';
 
+import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
+
 export class Player {
-    constructor(scene, physicsWorld, camera) {
+    constructor(scene, physicsWorld, camera, ui) {
         this.scene = scene;
         this.physicsWorld = physicsWorld;
         this.camera = camera;
+        this.ui = ui;
 
         this.moveForward = false;
         this.moveBackward = false;
@@ -29,18 +32,23 @@ export class Player {
             shape: this.shape,
             material: new CANNON.Material({ friction: 0 })
         });
-        this.body.position.set(-700, 10, 0);
+        this.body.position.set(-10, 5, 0);
         this.body.fixedRotation = true;
         this.body.updateMassProperties();
         this.physicsWorld.addBody(this.body);
     }
 
     initVisuals() {
-        this.mesh = new THREE.Mesh(
-            new THREE.CapsuleGeometry(1, 2, 4, 8),
-            new THREE.MeshStandardMaterial({ color: 0xff0000 })
-        );
+        this.mesh = new THREE.Group();
         this.scene.add(this.mesh);
+
+        const loader = new GLTFLoader();
+        loader.load('Duck.glb', (gltf) => {
+            const model = gltf.scene;
+            model.scale.set(1, 1, 1);
+            model.position.y = -1;
+            this.mesh.add(model);
+        });
     }
 
     initControls() {
@@ -132,8 +140,13 @@ export class Player {
     update() {
         const speed = 20;
 
-        this.direction.z = Number(this.moveForward) - Number(this.moveBackward);
-        this.direction.x = Number(this.moveLeft) - Number(this.moveRight);
+        const forward = this.moveForward || this.ui.controls.gas.pressed;
+        const backward = this.moveBackward || this.ui.controls.brake.pressed;
+        const left = this.moveLeft || this.ui.controls.left.pressed;
+        const right = this.moveRight || this.ui.controls.right.pressed;
+
+        this.direction.z = Number(forward) - Number(backward);
+        this.direction.x = Number(left) - Number(right);
         this.direction.normalize();
 
         // Rotate movement direction based on camera rotation

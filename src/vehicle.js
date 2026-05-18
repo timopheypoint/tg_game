@@ -1,12 +1,15 @@
 import * as THREE from 'three';
 import * as CANNON from 'cannon-es';
 
+import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
+
 export class Vehicle {
-    constructor(scene, physicsWorld, camera, position) {
+    constructor(scene, physicsWorld, camera, position, ui) {
         this.scene = scene;
         this.physicsWorld = physicsWorld;
         this.camera = camera;
         this.position = position;
+        this.ui = ui;
 
         this.chassisWidth = 2;
         this.chassisHeight = 1;
@@ -63,11 +66,16 @@ export class Vehicle {
     }
 
     initVisuals() {
-        this.mesh = new THREE.Mesh(
-            new THREE.BoxGeometry(this.chassisWidth, this.chassisHeight, this.chassisLength),
-            new THREE.MeshStandardMaterial({ color: 0x0000ff })
-        );
+        this.mesh = new THREE.Group();
         this.scene.add(this.mesh);
+
+        const loader = new GLTFLoader();
+        loader.load('Car.glb', (gltf) => {
+            const model = gltf.scene;
+            model.scale.set(0.5, 0.5, 0.5);
+            model.position.y = -0.5;
+            this.mesh.add(model);
+        });
     }
 
     initControls() {
@@ -97,6 +105,32 @@ export class Vehicle {
         this.mesh.quaternion.copy(this.chassisBody.quaternion);
 
         if (this.active) {
+            // Mobile Controls
+            const engineForce = 1500;
+            const steeringValue = 0.5;
+
+            if (this.ui.controls.gas.pressed) {
+                this.vehicle.applyEngineForce(-engineForce, 2);
+                this.vehicle.applyEngineForce(-engineForce, 3);
+            } else if (this.ui.controls.brake.pressed) {
+                this.vehicle.applyEngineForce(engineForce, 2);
+                this.vehicle.applyEngineForce(engineForce, 3);
+            } else {
+                this.vehicle.applyEngineForce(0, 2);
+                this.vehicle.applyEngineForce(0, 3);
+            }
+
+            if (this.ui.controls.left.pressed) {
+                this.vehicle.setSteeringValue(steeringValue, 0);
+                this.vehicle.setSteeringValue(steeringValue, 1);
+            } else if (this.ui.controls.right.pressed) {
+                this.vehicle.setSteeringValue(-steeringValue, 0);
+                this.vehicle.setSteeringValue(-steeringValue, 1);
+            } else {
+                this.vehicle.setSteeringValue(0, 0);
+                this.vehicle.setSteeringValue(0, 1);
+            }
+
             const relativeCameraOffset = new THREE.Vector3(0, 5, 12);
             const cameraOffset = relativeCameraOffset.applyQuaternion(this.mesh.quaternion);
             this.camera.position.x = this.mesh.position.x + cameraOffset.x;

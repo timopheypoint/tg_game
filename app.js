@@ -23,10 +23,10 @@ class Game {
         document.body.appendChild(this.renderer.domElement);
 
         this.physicsWorld = new PhysicsWorld();
-        this.world = new World(this.scene, this.physicsWorld.world);
-        this.player = new Player(this.scene, this.physicsWorld.world, this.camera);
-        this.vehicle = new Vehicle(this.scene, this.physicsWorld.world, this.camera, new THREE.Vector3(-650, 5, 0));
         this.ui = new UI();
+        this.world = new World(this.scene, this.physicsWorld.world);
+        this.player = new Player(this.scene, this.physicsWorld.world, this.camera, this.ui);
+        this.vehicle = new Vehicle(this.scene, this.physicsWorld.world, this.camera, new THREE.Vector3(-650, 5, 0), this.ui);
         this.storyManager = new StoryManager(this);
 
         // Load specific asset example (The "Girlfriend" placeholder)
@@ -39,24 +39,34 @@ class Game {
         this.scene.add(ambientLight);
 
         // Interaction logic
-        document.addEventListener('keydown', (e) => {
-            if (e.code === 'KeyF') {
-                const dist = this.player.mesh.position.distanceTo(this.vehicle.mesh.position);
-                if (dist < 5) {
-                    if (!this.vehicle.active) {
-                        this.vehicle.active = true;
-                        this.player.mesh.visible = false;
-                        this.player.body.collisionFilterMask = 0; // Disable physics for player
-                    } else {
-                        this.vehicle.active = false;
-                        this.player.mesh.visible = true;
-                        this.player.body.collisionFilterMask = 1; // Enable physics
-                        this.player.body.position.copy(this.vehicle.chassisBody.position);
-                        this.player.body.position.x += 3;
-                    }
+        const interact = () => {
+            const dist = this.player.mesh.position.distanceTo(this.vehicle.mesh.position);
+            if (dist < 10) {
+                if (!this.vehicle.active) {
+                    this.vehicle.active = true;
+                    this.player.mesh.visible = false;
+                    this.player.body.collisionFilterMask = 0;
+                } else {
+                    this.vehicle.active = false;
+                    this.player.mesh.visible = true;
+                    this.player.body.collisionFilterMask = 1;
+                    this.player.body.position.copy(this.vehicle.chassisBody.position);
+                    this.player.body.position.x += 5;
                 }
             }
+        };
+
+        document.addEventListener('keydown', (e) => {
+            if (e.code === 'KeyF') interact();
         });
+
+        // Mobile interaction
+        setInterval(() => {
+            if (this.ui.controls.enter.pressed) {
+                interact();
+                this.ui.controls.enter.pressed = false; // Debounce
+            }
+        }, 200);
 
         const sun = new THREE.DirectionalLight(0xffffff, 1);
         sun.position.set(100, 200, 100);

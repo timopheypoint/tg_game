@@ -1,6 +1,24 @@
 import * as THREE from 'three';
 import * as CANNON from 'cannon-es';
 
+export class MissionMarker {
+    constructor(scene, position) {
+        this.scene = scene;
+        this.position = position;
+
+        const geometry = new THREE.CylinderGeometry(2, 2, 20, 32);
+        const material = new THREE.MeshBasicMaterial({ color: 0xffff00, transparent: true, opacity: 0.5 });
+        this.mesh = new THREE.Mesh(geometry, material);
+        this.mesh.position.copy(position);
+        this.mesh.position.y += 10;
+        this.scene.add(this.mesh);
+    }
+
+    remove() {
+        this.scene.remove(this.mesh);
+    }
+}
+
 export class World {
     constructor(scene, physicsWorld) {
         this.scene = scene;
