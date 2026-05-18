@@ -1,0 +1,7 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="app_name">GTASim</string>
+    <string name="title_activity_main">GTASim</string>
+    <string name="package_name">com.jules.gtasim</string>
+    <string name="custom_url_scheme">com.jules.gtasim</string>
+</resources>

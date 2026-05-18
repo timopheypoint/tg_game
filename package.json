@@ -19,6 +19,9 @@
   },
   "homepage": "https://github.com/timopheypoint/tg_game#readme",
   "dependencies": {
+    "@capacitor/android": "^8.3.4",
+    "@capacitor/cli": "^8.3.4",
+    "@capacitor/core": "^8.3.4",
     "cannon-es": "^0.20.0",
     "dat.gui": "^0.7.9",
     "three": "^0.184.0"
