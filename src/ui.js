@@ -96,6 +96,7 @@ export class UI {
         createBtn('R', '20px', '200px', 'right');
         createBtn('JUMP', '180px', '20px', 'jump');
         createBtn('ENTER', '180px', '100px', 'enter');
+        createBtn('FIRE', '260px', '20px', 'fire');
 
         // Stats
         const stats = document.createElement('div');
